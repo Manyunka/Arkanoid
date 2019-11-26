@@ -23,8 +23,8 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
 
     private var paddleMoving = STOP
     init {
-        width = (paddle.width * screenX / 1080f).toInt()
-        height = (paddle.height * screenY / 1920f).toInt()
+        width = paddle.width
+        height = paddle.height
 
         maxX = screenX - width
 
@@ -59,6 +59,7 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
 
     fun reset(screenX: Int, screenY: Int) {
         x = (screenX / 2).toFloat()
+        //y = screenY.toFloat()
         /*rect.left = (screenX / 2).toFloat()
         rect.top = (screenY - 20).toFloat()
         rect.right = screenX / 2 + length

@@ -20,6 +20,7 @@ class GameActivity : Activity() {
         setContentView(R.layout.activity_main)
 
         mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
+        mediaPlayer.isLooping = true;
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)

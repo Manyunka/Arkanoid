@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         mediaPlayer = MediaPlayer.create(this, R.raw.main_sound)
+        mediaPlayer.isLooping = true
 
         /*val set = AnimatorInflater.loadAnimator(this, R.animator.bubble_trans_down) as AnimatorSet
         val set2 = AnimatorInflater.loadAnimator(this, R.animator.bubble_trans_up) as AnimatorSet

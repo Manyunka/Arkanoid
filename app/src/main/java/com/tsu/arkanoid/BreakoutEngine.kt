@@ -13,9 +13,8 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import kotlin.math.abs
 import android.view.MotionEvent
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
+import android.media.SoundPool
+import android.media.AudioAttributes
 
 
 @SuppressLint("ViewConstructor")
@@ -23,7 +22,6 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
     private var gameThread: Thread? = null
     private var ourHolder: SurfaceHolder = holder
-
 
     @Volatile
     var playing = false
@@ -46,6 +44,13 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
     private var bricks = arrayOfNulls<Brick>(100)
     private var numBricks = 0
 
+    private var lives = 3
+
+    private var soundPool: SoundPool
+    private var popID: Int
+    private var boundID: Int
+    private var paddleID: Int
+
     private var orientationData: OrientationData
 
     init {
@@ -62,20 +67,37 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
         orientationData = OrientationData(context)
         orientationData.register()
 
+        val attributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setAudioAttributes(attributes)
+            .build()
+
+        popID = soundPool.load(context, R.raw.pop, 0)
+        boundID = soundPool.load(context, R.raw.bound, 0)
+        paddleID = soundPool.load(context, R.raw.paddle, 0)
+
         create()
     }
 
     private fun create() {
-        ball.reset(screenX, screenY)
         paddle.reset(screenX, screenY)
+        ball.reset(screenX, screenY)
 
-        val brickWidth = screenX / 8
+        lives = 3
+
+        val brickWidth = screenX / 10
         val brickHeight = screenY / 20
 
         numBricks = 0
-        for (column in 0..7) {
-            for (row in 0..4) {
-                bricks[numBricks] = Brick(row, column, brickWidth, brickHeight, resources)
+        for (column in 0..9) {
+            for (row in 0..5) {
+                bricks[numBricks] = Brick(row, column, brickWidth, brickHeight, 2, resources)
+                if (row == 5) bricks[numBricks] = Brick(row, column, brickWidth, brickHeight, 1, resources)
+                if (column in 3..6 && row in 4..5) bricks[numBricks]!!.setInvisible()
                 numBricks++
             }
         }
@@ -114,8 +136,9 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
                     bricks[i]!!.y + bricks[i]!!.getBrick().height)
 
                 if (RectF.intersects(brickRect, ballRect)) {
-                    bricks[i]!!.setInvisible()
+                    bricks[i]!!.decreaseLevel()
                     ball.reverseYVel()
+                    soundPool.play(popID, 1f, 1f, 0, 0, 1f)
                 }
             }
         }
@@ -124,26 +147,37 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             ball.setRandomXVel()
             ball.reverseYVel()
             ball.clearObstacleY(paddle.y - 40)
+            soundPool.play(paddleID, 1f, 1f, 0, 0, 1f)
         }
         if (ball.y > screenY) {
             ball.reverseYVel()
             ball.clearObstacleY(screenY - 2.0f)
+            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+
+            lives--
+            if (lives < 1) {
+                paused = true
+                create()
+            }
         }
 
         if (ball.y < 0) {
             ball.reverseYVel()
             ball.clearObstacleY(2.0f)
+            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
         if (ball.x < 0) {
             ball.reverseXVelocity()
             ball.clearObstacleX(0.0f)
+            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
         if (ball.x > screenX - ballRect.width()) {
 
             ball.reverseXVelocity()
             ball.clearObstacleX(screenX - ballRect.width())
+            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
         if (orientationData.startOrientation != null) {
@@ -171,15 +205,19 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
             canvas.drawBitmap(background, 0f, 0f, paint)
 
-            canvas.drawBitmap(paddle.getPaddle(), paddle.x, paddle.y, paint)
-
             canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
+
+            canvas.drawBitmap(paddle.getPaddle(), paddle.x, paddle.y, paint)
 
             for (i in 0 until numBricks) {
                 if (bricks[i]!!.getVisibility()) {
                     canvas.drawBitmap(bricks[i]!!.getBrick(), bricks[i]!!.x, bricks[i]!!.y, paint)
                 }
             }
+
+            paint.color = Color.WHITE
+            paint.textSize = 50f
+            canvas.drawText("Lives: $lives", 10f, 50f, paint)
 
             ourHolder.unlockCanvasAndPost(canvas)
         }

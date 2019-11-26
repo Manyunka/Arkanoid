@@ -7,18 +7,20 @@ import android.graphics.RectF
 
 
 
-class Brick(row: Int, column: Int, width: Int, height: Int, res: Resources) {
-    private var brick: Bitmap = BitmapFactory.decodeResource(res, R.drawable.bubble_blue)
+class Brick(row: Int, column: Int, width: Int, height: Int, private var level: Int, res: Resources) {
+    private val brick1 = BitmapFactory.decodeResource(res, R.drawable.bubble_blue)
+    private val brick2 = BitmapFactory.decodeResource(res, R.drawable.bubble_green)
+    private var brick: Bitmap
     private var isVisible: Boolean = false
     var x: Float
     var y: Float
 
     init {
-
         isVisible = true
         val padding = 2
 
-        brick = Bitmap.createScaledBitmap(brick, width, height, false)
+        brick = if (level == 2) Bitmap.createScaledBitmap(brick2, width, height, false)
+        else Bitmap.createScaledBitmap(brick1, width, height, false)
 
         x = (column * width + padding).toFloat()
         y = (row * height + padding).toFloat()
@@ -37,14 +39,13 @@ class Brick(row: Int, column: Int, width: Int, height: Int, res: Resources) {
 
     fun setInvisible() {
         isVisible = false
-        /*if(!isVisible){
-            isVisible = true;
-            return "green";
-        }
-        else{
-            isVisible  = false;
-            return "red";
-        }*/
+    }
+
+    fun decreaseLevel() {
+        if (level > 1) {
+            level--
+            brick = Bitmap.createScaledBitmap(brick1, brick.width, brick.height, false)
+        } else isVisible = false
     }
 
     fun getVisibility(): Boolean {
