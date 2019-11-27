@@ -6,6 +6,8 @@ import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.media.MediaPlayer
+import android.view.WindowManager
+import kotlinx.android.synthetic.main.activity_game.*
 
 
 class GameActivity : Activity() {
@@ -19,8 +21,10 @@ class GameActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
-        mediaPlayer.isLooping = true;
+        mediaPlayer.isLooping = true
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)

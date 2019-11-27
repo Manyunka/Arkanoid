@@ -3,7 +3,7 @@ package com.tsu.arkanoid
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.RectF
+
 import java.util.*
 
 

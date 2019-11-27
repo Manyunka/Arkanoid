@@ -15,6 +15,9 @@ import kotlin.math.abs
 import android.view.MotionEvent
 import android.media.SoundPool
 import android.media.AudioAttributes
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 
 @SuppressLint("ViewConstructor")
@@ -36,6 +39,7 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
     private var screenX: Int
     private var screenY: Int
+    private var pudding = 25.0f
 
     private var paddle: Paddle
 
@@ -45,6 +49,7 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
     private var numBricks = 0
 
     private var lives = 3
+    private var score = 0
 
     private var soundPool: SoundPool
     private var popID: Int
@@ -86,17 +91,25 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
     private fun create() {
         paddle.reset(screenX, screenY)
         ball.reset(screenX, screenY)
+        pudding = ball.getBall().width.toFloat()
 
         lives = 3
+        score = 0
 
-        val brickWidth = screenX / 10
-        val brickHeight = screenY / 20
+        val brickWidth = ((screenX - 2 * pudding) / 9).toInt()
+        val brickHeight = screenY / 18
 
         numBricks = 0
-        for (column in 0..9) {
+        for (column in 0..8) {
             for (row in 0..5) {
-                bricks[numBricks] = Brick(row, column, brickWidth, brickHeight, 2, resources)
-                if (row == 5) bricks[numBricks] = Brick(row, column, brickWidth, brickHeight, 1, resources)
+                bricks[numBricks] = Brick(
+                    column * brickWidth.toFloat() + pudding / 8,
+                    row * brickHeight + 4 * pudding,
+                    brickWidth, brickHeight, 2, resources)
+                if (row == 5) bricks[numBricks] = Brick(
+                    column * brickWidth.toFloat()  + pudding / 8,
+                    row * brickHeight + 4 * pudding,
+                    brickWidth, brickHeight, 1, resources)
                 if (column in 3..6 && row in 4..5) bricks[numBricks]!!.setInvisible()
                 numBricks++
             }
@@ -114,9 +127,7 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame
             }
-
         }
-
     }
 
     private fun update() {
@@ -138,6 +149,7 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
                 if (RectF.intersects(brickRect, ballRect)) {
                     bricks[i]!!.decreaseLevel()
                     ball.reverseYVel()
+                    score++
                     soundPool.play(popID, 1f, 1f, 0, 0, 1f)
                 }
             }
@@ -161,22 +173,22 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             }
         }
 
-        if (ball.y < 0) {
+        if (ball.y < pudding * 4) {
             ball.reverseYVel()
-            ball.clearObstacleY(2.0f)
+            ball.clearObstacleY(pudding * 4)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (ball.x < 0) {
+        if (ball.x < pudding) {
             ball.reverseXVelocity()
-            ball.clearObstacleX(0.0f)
+            ball.clearObstacleX(pudding)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (ball.x > screenX - ballRect.width()) {
+        if (ball.x > screenX - ballRect.width() - pudding) {
 
             ball.reverseXVelocity()
-            ball.clearObstacleX(screenX - ballRect.width())
+            ball.clearObstacleX(screenX - ballRect.width() - pudding)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
@@ -185,11 +197,13 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
             val xSpeed = roll * screenX / 1080f
 
-            paddle.x += if (abs(1000 / fps * xSpeed) > 5) (1000 / fps * xSpeed).toInt() else 0
+            if (abs(xSpeed) > 0)
+                paddle.x += if (abs(1000 / fps * xSpeed) > 5) (1000 / fps * xSpeed).toInt() else 0
         }
 
-        if (paddle.x < 0) paddle.x = 0f
-        if (paddle.x > screenX - paddleRect.width()) paddle.x = screenX - paddleRect.width()
+        if (paddle.x < pudding) paddle.x = pudding
+        if (paddle.x > screenX - paddleRect.width() - pudding)
+            paddle.x = screenX - paddleRect.width() - pudding
     }
 
     private fun draw() {
@@ -197,13 +211,31 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             canvas = ourHolder.lockCanvas()
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
+            //paint.color = Color.WHITE
+
+            //val borders = Rect(0, 0, screenX, screenY)
+            //canvas.drawRect(borders, paint)
+
+            //var borders = BitmapFactory
+                //.decodeResource(resources, R.drawable.metal_panel)
+
+            val borders = resources.getDrawable(R.drawable.grey_panel)
+            borders.setBounds(0, 0, screenX, screenY + 50)
+            borders.draw(canvas)
+
             var background = BitmapFactory
                 .decodeResource(resources, R.drawable.level1_background)
 
+            //borders = Bitmap
+                //.createScaledBitmap(borders,
+                   // screenX, screenY, false)
             background = Bitmap
-                .createScaledBitmap(background, screenX, screenY, false)
+                .createScaledBitmap(background,
+                    screenX - pudding.toInt() * 2, screenY - pudding.toInt() * 2, false)
 
-            canvas.drawBitmap(background, 0f, 0f, paint)
+            //canvas.drawBitmap(borders, 0f, 0f, paint)
+
+            canvas.drawBitmap(background, pudding, pudding * 4, paint)
 
             canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
 
@@ -211,13 +243,13 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
             for (i in 0 until numBricks) {
                 if (bricks[i]!!.getVisibility()) {
-                    canvas.drawBitmap(bricks[i]!!.getBrick(), bricks[i]!!.x, bricks[i]!!.y, paint)
+                    canvas.drawBitmap(bricks[i]!!.getBrick(), bricks[i]!!.x + pudding, bricks[i]!!.y, paint)
                 }
             }
 
-            paint.color = Color.WHITE
-            paint.textSize = 50f
-            canvas.drawText("Lives: $lives", 10f, 50f, paint)
+            paint.color = Color.BLUE
+            paint.textSize = 1.7f * ball.getBall().height
+            canvas.drawText("Lives: $lives      Score: $score", pudding, pudding * 3, paint)
 
             ourHolder.unlockCanvasAndPost(canvas)
         }

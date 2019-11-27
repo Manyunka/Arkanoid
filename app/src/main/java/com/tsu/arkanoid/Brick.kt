@@ -3,11 +3,9 @@ package com.tsu.arkanoid
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.RectF
 
 
-
-class Brick(row: Int, column: Int, width: Int, height: Int, private var level: Int, res: Resources) {
+class Brick(x: Float, y: Float, width: Int, height: Int, private var level: Int, res: Resources) {
     private val brick1 = BitmapFactory.decodeResource(res, R.drawable.bubble_blue)
     private val brick2 = BitmapFactory.decodeResource(res, R.drawable.bubble_green)
     private var brick: Bitmap
@@ -17,13 +15,15 @@ class Brick(row: Int, column: Int, width: Int, height: Int, private var level: I
 
     init {
         isVisible = true
-        val padding = 2
+        val padding = 5
 
         brick = if (level == 2) Bitmap.createScaledBitmap(brick2, width, height, false)
         else Bitmap.createScaledBitmap(brick1, width, height, false)
 
-        x = (column * width + padding).toFloat()
-        y = (row * height + padding).toFloat()
+        this.x = x
+        this.y = y
+        //x = (column * width + padding).toFloat()
+        //y = (row * height + padding).toFloat()
 
         /*rect = RectF(
             (column * width + padding).toFloat(),
