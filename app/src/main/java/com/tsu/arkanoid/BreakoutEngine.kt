@@ -11,6 +11,7 @@ import kotlin.math.abs
 import android.view.MotionEvent
 import android.media.SoundPool
 import android.media.AudioAttributes
+import androidx.core.content.ContextCompat
 
 @SuppressLint("ViewConstructor")
 abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(context),
@@ -94,22 +95,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         lives = 3
         score = 0
 
-        //numBricks = 0
         createBricks()
-        /*for (column in 0..8) {
-            for (row in 0..5) {
-                bricks[numBricks] = Brick(
-                    column * brickWidth.toFloat() + pudding / 8,
-                    row * brickHeight + 4 * pudding,
-                    brickWidth, brickHeight, 2, resources)
-                if (row == 5) bricks[numBricks] = Brick(
-                    column * brickWidth.toFloat()  + pudding / 8,
-                    row * brickHeight + 4 * pudding,
-                    brickWidth, brickHeight, 1, resources)
-                if (column in 3..5 && row in 4..5) bricks[numBricks]!!.setInvisible()
-                numBricks++
-            }
-        }*/
     }
 
     override fun run() {
@@ -214,10 +200,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             canvas = ourHolder.lockCanvas()
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
-            val borders = resources.getDrawable(R.drawable.grey_panel)
-            borders.setBounds(0, 0, screenX, screenY + 50)
-            borders.draw(canvas)
-
             var background = BitmapFactory
                 .decodeResource(resources, backgroundID)
             background = Bitmap
@@ -226,7 +208,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     screenX - pudding.toInt() * 2, screenY - pudding.toInt() * 2, false
                 )
 
-            //canvas.drawBitmap(borders, 0f, 0f, paint)
+            paint.color = ContextCompat.getColor(context, R.color.panelColor)
+            canvas.drawRect(0f, 0f, pudding, screenY.toFloat(), paint)
+            canvas.drawRect(screenX - pudding, 0f, screenX.toFloat(), screenY.toFloat(), paint)
+            canvas.drawRect(0f, 0f, screenX.toFloat(), pudding * 4, paint)
 
             canvas.drawBitmap(background, pudding, pudding * 4, paint)
 
@@ -245,9 +230,9 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 }
             }
 
-            paint.color = Color.BLUE
-            paint.textSize = 1.7f * ball.getBall().height
-            canvas.drawText("Lives: $lives      Score: $score", pudding, pudding * 3, paint)
+            paint.color = ContextCompat.getColor(context, R.color.colorAccent)
+            paint.textSize = 2f * pudding
+            canvas.drawText("Lives: $lives      Score: $score", pudding * 2, pudding * 3, paint)
 
             ourHolder.unlockCanvasAndPost(canvas)
         }

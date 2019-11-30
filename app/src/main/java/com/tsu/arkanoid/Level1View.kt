@@ -27,7 +27,7 @@ class Level1View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
         for (column in 0..8) {
             for (row in 0..5) {
                 bricks[numBricks] = Star(
-                    column * brickWidth.toFloat() + pudding / 8,
+                    column * brickWidth.toFloat(),
                     row * brickHeight + 4 * pudding,
                     brickWidth, brickHeight, levels[numBricks], resources
                 )

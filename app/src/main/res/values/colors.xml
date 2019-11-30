@@ -3,4 +3,5 @@
     <color name="colorPrimary">#85C6FF</color>
     <color name="colorPrimaryDark">#121399</color>
     <color name="colorAccent">#FFAB5D</color>
+    <color name="panelColor">#06063D</color>
 </resources>
