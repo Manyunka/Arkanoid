@@ -8,7 +8,6 @@ import java.util.*
 
 
 
-
 class Ball(screenX: Int, screenY: Int, res: Resources) {
     private var ball = BitmapFactory.decodeResource(res, R.drawable.ball)
     private var xVel: Float
@@ -19,14 +18,14 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
     var y: Float
 
     init{
-        xVel = 300 * screenX / 1080f
-        yVel = -600 * screenY / 1920f
+        xVel = 200 * screenX / 1080f
+        yVel = -400 * screenY / 1920f
 
         width = ball.width
         height = ball.height
 
         x = (screenX / 2).toFloat()
-        y = (screenY - 40 - 2 * height).toFloat()
+        y = (screenY - 40 - height).toFloat()
 
         ball = Bitmap.createScaledBitmap(ball, width, height, false)
     }
@@ -38,10 +37,6 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
     fun update(fps: Long) {
         x += xVel / fps
         y += yVel / fps
-        /*rect.left = rect.left + (xVel / fps);
-        rect.top = rect.top + (yVel / fps);
-        rect.right = rect.left + width;
-        rect.bottom = rect.top - height;*/
     }
 
     fun reverseYVel() {
@@ -63,22 +58,14 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
 
     fun clearObstacleY(y: Float) {
         this.y = y
-        /*rect.bottom = y
-        rect.top = y + height*/
     }
 
     fun clearObstacleX(x: Float) {
         this.x = x
-        /*rect.left = x
-        rect.right = x + width*/
     }
 
     fun reset(screenX: Int, screenY: Int) {
         x = (screenX / 2).toFloat()
-        y = (screenY - 40 - 2 * height).toFloat()
-        /*rect.left = (screenX / 2).toFloat()
-        rect.top = (screenY - 40).toFloat()
-        rect.right = screenX / 2 + width
-        rect.bottom = screenY - 40 - height*/
+        y = (screenY - 40 - height).toFloat()
     }
 }

@@ -1,23 +1,21 @@
 package com.tsu.arkanoid
 
-import android.animation.AnimatorInflater
-import android.animation.AnimatorSet
 import android.content.Intent
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.view.WindowManager
-import android.widget.*
+
+
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mediaPlayer: MediaPlayer
+    private val LEVEL_1_ID = 1
+    private val LEVEL_2_ID = 2
+    private val LEVEL_3_ID = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +33,22 @@ class MainActivity : AppCompatActivity() {
         set.start()
         set2.start()*/
 
-        level1Button.setOnClickListener {
-            startActivity(Intent(this, GameActivity::class.java))
+        val gameIntent = Intent(this, GameActivity::class.java)
+
+        level1.setOnClickListener {
+            gameIntent.putExtra("LEVEL_ID", LEVEL_1_ID)
+            startActivity(gameIntent)
         }
 
+        level2.setOnClickListener {
+            gameIntent.putExtra("LEVEL_ID", LEVEL_2_ID)
+            startActivity(gameIntent)
+        }
+
+        level3.setOnClickListener {
+            gameIntent.putExtra("LEVEL_ID", LEVEL_3_ID)
+            startActivity(gameIntent)
+        }
     }
 
     override fun onPause() {

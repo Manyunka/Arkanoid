@@ -3,10 +3,6 @@ package com.tsu.arkanoid
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.util.Log
 import android.view.Display
 import android.view.SurfaceHolder
@@ -15,13 +11,10 @@ import kotlin.math.abs
 import android.view.MotionEvent
 import android.media.SoundPool
 import android.media.AudioAttributes
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
 
 @SuppressLint("ViewConstructor")
-class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(context), Runnable {
+abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(context),
+    Runnable {
 
     private var gameThread: Thread? = null
     private var ourHolder: SurfaceHolder = holder
@@ -37,16 +30,19 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
     private var timeThisFrame: Long = 0
 
-    private var screenX: Int
-    private var screenY: Int
-    private var pudding = 25.0f
+    var screenX: Int
+    var screenY: Int
+    var pudding = 25.0f
+
+    var backgroundID = -1
 
     private var paddle: Paddle
 
     private var ball: Ball
 
-    private var bricks = arrayOfNulls<Brick>(100)
-    private var numBricks = 0
+    var bricks = arrayOfNulls<Brick>(100)
+
+    var numBricks = 0
 
     private var lives = 3
     private var score = 0
@@ -64,6 +60,8 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
         screenX = size.x
         screenY = size.y
+
+        //var bricks = arrayOfNulls<Star>(100)
 
         paddle = Paddle(screenX, screenY, resources)
 
@@ -90,17 +88,15 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
 
     private fun create() {
         paddle.reset(screenX, screenY)
-        ball.reset(screenX, screenY)
+        ball.reset(screenX, screenY - paddle.getPaddle().height)
         pudding = ball.getBall().width.toFloat()
 
         lives = 3
         score = 0
 
-        val brickWidth = ((screenX - 2 * pudding) / 9).toInt()
-        val brickHeight = screenY / 18
-
-        numBricks = 0
-        for (column in 0..8) {
+        //numBricks = 0
+        createBricks()
+        /*for (column in 0..8) {
             for (row in 0..5) {
                 bricks[numBricks] = Brick(
                     column * brickWidth.toFloat() + pudding / 8,
@@ -110,10 +106,10 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
                     column * brickWidth.toFloat()  + pudding / 8,
                     row * brickHeight + 4 * pudding,
                     brickWidth, brickHeight, 1, resources)
-                if (column in 3..6 && row in 4..5) bricks[numBricks]!!.setInvisible()
+                if (column in 3..5 && row in 4..5) bricks[numBricks]!!.setInvisible()
                 numBricks++
             }
-        }
+        }*/
     }
 
     override fun run() {
@@ -134,17 +130,23 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
         ball.update(fps)
         //paddle.update(fps)
 
-        val ballRect = RectF(ball.x, ball.y,
-            ball.x + ball.getBall().width, ball.y + ball.getBall().height)
-        val paddleRect = RectF(paddle.x, paddle.y,
+        val ballRect = RectF(
+            ball.x, ball.y,
+            ball.x + ball.getBall().width, ball.y + ball.getBall().height
+        )
+        val paddleRect = RectF(
+            paddle.x, paddle.y,
             paddle.x + paddle.getPaddle().width,
-            paddle.y + paddle.getPaddle().height)
+            paddle.y + paddle.getPaddle().height
+        )
 
-       for (i in 0 until numBricks) {
+        for (i in 0 until numBricks) {
             if (bricks[i]!!.getVisibility()) {
-                val brickRect = RectF(bricks[i]!!.x, bricks[i]!!.y,
+                val brickRect = RectF(
+                    bricks[i]!!.x, bricks[i]!!.y,
                     bricks[i]!!.x + bricks[i]!!.getBrick().width,
-                    bricks[i]!!.y + bricks[i]!!.getBrick().height)
+                    bricks[i]!!.y + bricks[i]!!.getBrick().height
+                )
 
                 if (RectF.intersects(brickRect, ballRect)) {
                     bricks[i]!!.decreaseLevel()
@@ -154,6 +156,7 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
                 }
             }
         }
+
 
         if (RectF.intersects(ballRect, paddleRect)) {
             ball.setRandomXVel()
@@ -211,39 +214,34 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             canvas = ourHolder.lockCanvas()
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
-            //paint.color = Color.WHITE
-
-            //val borders = Rect(0, 0, screenX, screenY)
-            //canvas.drawRect(borders, paint)
-
-            //var borders = BitmapFactory
-                //.decodeResource(resources, R.drawable.metal_panel)
-
             val borders = resources.getDrawable(R.drawable.grey_panel)
             borders.setBounds(0, 0, screenX, screenY + 50)
             borders.draw(canvas)
 
             var background = BitmapFactory
-                .decodeResource(resources, R.drawable.level1_background)
-
-            //borders = Bitmap
-                //.createScaledBitmap(borders,
-                   // screenX, screenY, false)
+                .decodeResource(resources, backgroundID)
             background = Bitmap
-                .createScaledBitmap(background,
-                    screenX - pudding.toInt() * 2, screenY - pudding.toInt() * 2, false)
+                .createScaledBitmap(
+                    background,
+                    screenX - pudding.toInt() * 2, screenY - pudding.toInt() * 2, false
+                )
 
             //canvas.drawBitmap(borders, 0f, 0f, paint)
 
             canvas.drawBitmap(background, pudding, pudding * 4, paint)
 
-            canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
-
             canvas.drawBitmap(paddle.getPaddle(), paddle.x, paddle.y, paint)
+
+            canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
 
             for (i in 0 until numBricks) {
                 if (bricks[i]!!.getVisibility()) {
-                    canvas.drawBitmap(bricks[i]!!.getBrick(), bricks[i]!!.x + pudding, bricks[i]!!.y, paint)
+                    canvas.drawBitmap(
+                        bricks[i]!!.getBrick(),
+                        bricks[i]!!.x + pudding,
+                        bricks[i]!!.y,
+                        paint
+                    )
                 }
             }
 
@@ -255,23 +253,22 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
         }
     }
 
-    fun pause(sensorManager: SensorManager) {
+    abstract fun createBricks()
+
+    fun pause() {
         playing = false
         try {
             gameThread!!.join()
-            //sensorManager.unregisterListener(gyroListener)
         } catch (e: InterruptedException) {
             Log.e("Error:", "joining thread")
         }
 
     }
 
-    fun resume(sensorManager: SensorManager, sensor: Sensor) {
+    fun resume() {
         playing = true
         gameThread = Thread(this)
         gameThread!!.start()
-        //sensorManager.registerListener(gyroListener, sensor,
-            //SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -283,20 +280,6 @@ class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(conte
             }
         }
         return true
-    }
-
-
-    private var gyroListener: SensorEventListener = object : SensorEventListener {
-        override fun onAccuracyChanged(sensor: Sensor, acc: Int) {}
-
-        override fun onSensorChanged(event: SensorEvent) {
-            paused = false
-            if (event.values[2] < -0.3f) {
-                paddle.setMovementState(paddle.RIGHT)
-            } else if (event.values[2] > 0.3f) {
-                paddle.setMovementState(paddle.LEFT)
-            }
-        }
     }
 
 }

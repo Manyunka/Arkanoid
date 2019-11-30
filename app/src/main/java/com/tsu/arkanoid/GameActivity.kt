@@ -7,7 +7,6 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.media.MediaPlayer
 import android.view.WindowManager
-import kotlinx.android.synthetic.main.activity_game.*
 
 
 class GameActivity : Activity() {
@@ -23,27 +22,42 @@ class GameActivity : Activity() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
+        val display = windowManager.defaultDisplay
+
+        when (intent.extras?.getInt("LEVEL_ID")) {
+            1 -> {
+                mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
+                breakoutEngine = Level1View(this, display)
+            }
+            2 -> {
+                mediaPlayer = MediaPlayer.create(this, R.raw.level2_theme)
+                breakoutEngine = Level2View(this, display)
+            }
+            3 -> {
+                mediaPlayer = MediaPlayer.create(this, R.raw.level3_theme)
+                breakoutEngine = Level3View(this, display)
+            }
+            else -> mediaPlayer = MediaPlayer.create(this, R.raw.level2_theme)
+        }
+
         mediaPlayer.isLooping = true
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
-        val display = windowManager.defaultDisplay
-        breakoutEngine = BreakoutEngine(this, display)
         setContentView(breakoutEngine)
 
     }
 
     override fun onResume() {
         super.onResume()
-        breakoutEngine.resume(sensorManager, sensor)
+        breakoutEngine.resume()
         mediaPlayer.start()
     }
 
     override fun onPause() {
         super.onPause()
-        breakoutEngine.pause(sensorManager)
+        breakoutEngine.pause()
         mediaPlayer.pause()
 
     }

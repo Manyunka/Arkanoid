@@ -3,8 +3,6 @@ package com.tsu.arkanoid
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.RectF
-
 
 
 class Paddle(screenX: Int, screenY: Int, res: Resources) {
@@ -16,12 +14,12 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
 
     private var paddleSpeed: Float
 
-    private val STOP = 0
-    val LEFT = 1
-    val RIGHT = 2
-    val maxX: Int
+    //private val STOP = 0
+    //val LEFT = 1
+    //val RIGHT = 2
+    private val maxX: Int
 
-    private var paddleMoving = STOP
+    //private var paddleMoving = STOP
     init {
         width = paddle.width
         height = paddle.height
@@ -40,7 +38,7 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
         return paddle
     }
 
-    fun setMovementState(state: Int) {
+    /*fun setMovementState(state: Int) {
         paddleMoving = state
     }
 
@@ -52,18 +50,11 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
         if (paddleMoving == RIGHT && x < maxX) {
             x += paddleSpeed / fps
         }
-
-        //rect.left = x
-        //rect.right = x + length
-    }
+    }*/
 
     fun reset(screenX: Int, screenY: Int) {
         x = (screenX / 2).toFloat()
-        //y = screenY.toFloat()
-        /*rect.left = (screenX / 2).toFloat()
-        rect.top = (screenY - 20).toFloat()
-        rect.right = screenX / 2 + length
-        rect.bottom = screenY.toFloat() - 20f - height*/
+        y = (screenY - 40 - height).toFloat()
     }
 
 }
