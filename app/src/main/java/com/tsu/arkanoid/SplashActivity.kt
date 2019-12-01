@@ -18,6 +18,7 @@ class SplashActivity : AppCompatActivity() {
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 startActivity(Intent(applicationContext, MainActivity::class.java))
+                finish()
             }
         }, 2800)
 

@@ -151,15 +151,19 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             soundPool.play(paddleID, 1f, 1f, 0, 0, 1f)
         }
         if (ball.y > screenY) {
-            ball.reverseYVel()
-            ball.clearObstacleY(screenY - 2.0f)
-            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+            //ball.reverseYVel()
+            //ball.clearObstacleY(screenY - 2.0f)
+            //soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+
+            paddle.reset(screenX, screenY)
+            ball.reset(screenX, screenY - paddle.getPaddle().height)
+            paused = true
 
             lives--
-            if (lives < 1) {
-                paused = true
-                create()
-            }
+            //if (lives < 1) {
+
+                //create()
+            //}
         }
 
         if (ball.y < pudding * 4) {
@@ -219,6 +223,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
             canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
 
+            var remBricks = 0
             for (i in 0 until numBricks) {
                 if (bricks[i]!!.getVisibility()) {
                     canvas.drawBitmap(
@@ -227,12 +232,28 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                         bricks[i]!!.y,
                         paint
                     )
+                    remBricks++
                 }
             }
 
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
             paint.textSize = 2f * pudding
             canvas.drawText("Lives: $lives      Score: $score", pudding * 2, pudding * 3, paint)
+
+            if (remBricks == 0) {
+                paint.textSize = 7f * pudding
+                paint.textAlign = Paint.Align.CENTER
+                canvas.drawText("WIN!", screenX * 0.5f, screenY * 0.5f, paint)
+                playing = false
+            }
+
+            if (lives < 1) {
+                paint.color = Color.RED
+                paint.textSize = 5f * pudding
+                paint.textAlign = Paint.Align.CENTER
+                canvas.drawText("GAME OVER", screenX * 0.5f, screenY * 0.5f, paint)
+                playing = false
+            }
 
             ourHolder.unlockCanvasAndPost(canvas)
         }

@@ -8,7 +8,7 @@
         android:transformPivotX="0dp"
         android:transformPivotY="0dp"
         android:valueFrom="0"
-        android:valueTo="60"
+        android:valueTo="75"
         android:valueType="floatType" />
     <objectAnimator
         android:duration="1500"
