@@ -25,7 +25,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private var paused = true
 
     private lateinit var canvas: Canvas
-    private var paint: Paint = Paint()
+    private var paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var fps: Long = 0
 
@@ -47,11 +47,13 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
     private var lives = 3
     private var score = 0
+    private var gameOver = false
 
     private var soundPool: SoundPool
     private var popID: Int
     private var boundID: Int
     private var paddleID: Int
+    private var lostID: Int
 
     private var orientationData: OrientationData
 
@@ -83,6 +85,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         popID = soundPool.load(context, R.raw.pop, 0)
         boundID = soundPool.load(context, R.raw.bound, 0)
         paddleID = soundPool.load(context, R.raw.paddle, 0)
+        lostID = soundPool.load(context, R.raw.lost, 0)
 
         create()
     }
@@ -101,7 +104,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     override fun run() {
         while (playing) {
             val startFrameTime = System.currentTimeMillis()
-            if (!paused) {
+            if (!paused && !gameOver) {
                 update()
             }
             draw()
@@ -153,12 +156,12 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         if (ball.y > screenY) {
             //ball.reverseYVel()
             //ball.clearObstacleY(screenY - 2.0f)
-            //soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+            soundPool.play(lostID, 1f, 1f, 0, 0, 1f)
 
             paddle.reset(screenX, screenY)
             ball.reset(screenX, screenY - paddle.getPaddle().height)
-            paused = true
 
+            paused = true
             lives--
             //if (lives < 1) {
 
@@ -202,7 +205,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private fun draw() {
         if (ourHolder.surface.isValid) {
             canvas = ourHolder.lockCanvas()
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
             var background = BitmapFactory
                 .decodeResource(resources, backgroundID)
@@ -238,13 +240,15 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
             paint.textSize = 2f * pudding
+            paint.textAlign = Paint.Align.LEFT
             canvas.drawText("Lives: $lives      Score: $score", pudding * 2, pudding * 3, paint)
 
             if (remBricks == 0) {
                 paint.textSize = 7f * pudding
                 paint.textAlign = Paint.Align.CENTER
                 canvas.drawText("WIN!", screenX * 0.5f, screenY * 0.5f, paint)
-                playing = false
+                gameOver = true
+                paused = true
             }
 
             if (lives < 1) {
@@ -252,7 +256,14 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 paint.textSize = 5f * pudding
                 paint.textAlign = Paint.Align.CENTER
                 canvas.drawText("GAME OVER", screenX * 0.5f, screenY * 0.5f, paint)
-                playing = false
+                gameOver = true
+                paused = true
+            }
+
+            if (paused && !gameOver) {
+                paint.textSize = 5f * pudding
+                paint.textAlign = Paint.Align.CENTER
+                canvas.drawText("TOUCH", screenX * 0.5f, screenY * 0.5f, paint)
             }
 
             ourHolder.unlockCanvasAndPost(canvas)

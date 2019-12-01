@@ -11,7 +11,7 @@ class Level3View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
         val brickHeight = screenY / 18
 
         val levels = arrayOf(
-            0, 1, 1, 1, 1, 1, 1, 1, 0,
+            4, 1, 1, 1, 1, 1, 1, 1, 4,
             1, 1, 2, 2, 2, 2, 2, 1, 1,
             1, 2, 2, 3, 4, 3, 2, 2, 1,
             1, 2, 3, 3, 4, 3, 3, 2, 1,
@@ -19,7 +19,7 @@ class Level3View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
             1, 2, 3, 3, 4, 3, 3, 2, 1,
             1, 2, 2, 3, 4, 3, 2, 2, 1,
             1, 1, 2, 2, 2, 2, 2, 1, 1,
-            0, 1, 1, 1, 1, 1, 1, 1, 0
+            4, 1, 1, 1, 1, 1, 1, 1, 4
         )
 
         numBricks = 0
