@@ -138,14 +138,21 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 )
 
                 if (RectF.intersects(brickRect, ballRect)) {
-                    bricks[i]!!.decreaseLevel()
-                    ball.reverseYVel()
-                    score++
+                    var f = false
+                    if (paddle.y + paddleRect.width() - ball.y < 3 || ball.y + ballRect.width() - paddle.y < 3) {
+                        ball.reverseYVel()
+                        bricks[i]!!.decreaseLevel()
+                        f = true
+                    }
+                    if (paddle.x + paddleRect.width() - ball.x < 3 || ball.x + ballRect.width() - paddle.x < 3) {
+                        ball.reverseXVel()
+                        if (!f) bricks[i]!!.decreaseLevel()
+                    }
                     soundPool.play(popID, 1f, 1f, 0, 0, 1f)
+                    score++
                 }
             }
         }
-
 
         if (RectF.intersects(ballRect, paddleRect)) {
             ball.setRandomXVel()
@@ -176,14 +183,14 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         }
 
         if (ball.x < pudding) {
-            ball.reverseXVelocity()
+            ball.reverseXVel()
             ball.clearObstacleX(pudding)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
 
         if (ball.x > screenX - ballRect.width() - pudding) {
 
-            ball.reverseXVelocity()
+            ball.reverseXVel()
             ball.clearObstacleX(screenX - ballRect.width() - pudding)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
         }
@@ -191,7 +198,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         if (orientationData.startOrientation != null) {
             val roll = orientationData.orientation[2] - orientationData.startOrientation!![2]
 
-            val xSpeed = roll * screenX / 1080f
+            val xSpeed = roll * screenX / 840f
 
             if (abs(xSpeed) > 0)
                 paddle.x += if (abs(1000 / fps * xSpeed) > 5) (1000 / fps * xSpeed).toInt() else 0

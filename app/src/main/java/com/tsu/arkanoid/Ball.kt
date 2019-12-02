@@ -43,7 +43,7 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
         yVel = -yVel
     }
 
-    fun reverseXVelocity() {
+    fun reverseXVel() {
         xVel = -xVel
     }
 
@@ -52,7 +52,7 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
         val answer = generator.nextInt(2)
 
         if (answer == 0) {
-            reverseXVelocity()
+            reverseXVel()
         }
     }
 

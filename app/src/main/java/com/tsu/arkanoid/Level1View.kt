@@ -8,7 +8,7 @@ import android.view.Display
 class Level1View(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
 
     override fun createBricks() {
-        val brickWidth = ((screenX - 2 * pudding) / 9).toInt()
+        val brickWidth = ((screenX - 3 * pudding) / 9).toInt()
         val brickHeight = screenY / 18
 
         val levels = arrayOf(
