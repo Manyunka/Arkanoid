@@ -7,9 +7,7 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.content.Context.SENSOR_SERVICE
 import android.hardware.Sensor
-import androidx.core.content.ContextCompat.getSystemService
 import android.hardware.SensorEventListener
-import android.provider.SyncStateContract
 
 
 class OrientationData(context: Context) : SensorEventListener {
@@ -22,12 +20,9 @@ class OrientationData(context: Context) : SensorEventListener {
 
     val orientation = FloatArray(3)
 
-    var startOrientation: FloatArray? = null
+    var startOrientation: FloatArray = floatArrayOf(0f, 0f, 0f)
         private set
 
-    fun newGame() {
-        startOrientation = null
-    }
 
     init {
         accelerometer = manager.getDefaultSensor(TYPE_ACCELEROMETER)
@@ -51,15 +46,11 @@ class OrientationData(context: Context) : SensorEventListener {
         else if (event.sensor.type == TYPE_MAGNETIC_FIELD)
             magOutput = event.values
         if (accelOutput != null && magOutput != null) {
-            val R = FloatArray(9)
-            val I = FloatArray(9)
-            val success = SensorManager.getRotationMatrix(R, I, accelOutput, magOutput)
+            val r = FloatArray(9)
+            val l = FloatArray(9)
+            val success = SensorManager.getRotationMatrix(r, l, accelOutput, magOutput)
             if (success) {
-                SensorManager.getOrientation(R, orientation)
-                if (startOrientation == null) {
-                    startOrientation = FloatArray(orientation.size)
-                    System.arraycopy(orientation, 0, startOrientation!!, 0, orientation.size)
-                }
+                SensorManager.getOrientation(r, orientation)
             }
         }
     }

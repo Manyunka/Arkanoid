@@ -3,6 +3,7 @@ package com.tsu.arkanoid
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import kotlin.math.abs
 
 
 class Paddle(screenX: Int, screenY: Int, res: Resources) {
@@ -12,14 +13,8 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
     var x: Float
     var y: Float
 
-    private var paddleSpeed: Float
-
-    //private val STOP = 0
-    //val LEFT = 1
-    //val RIGHT = 2
     private val maxX: Int
 
-    //private var paddleMoving = STOP
     init {
         width = paddle.width
         height = paddle.height
@@ -30,27 +25,15 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
         y = (screenY - 40 - height).toFloat()
 
         paddle = Bitmap.createScaledBitmap(paddle, width, height, false)
-
-        paddleSpeed = 350f
     }
 
     fun getPaddle(): Bitmap {
         return paddle
     }
 
-    /*fun setMovementState(state: Int) {
-        paddleMoving = state
+    fun update(speed: Float, timeFrame: Long) {
+        x += if (abs(timeFrame * speed) > 5) (timeFrame * speed).toInt() else 0
     }
-
-    fun update(fps: Long) {
-       if (paddleMoving == LEFT && x > 0) {
-            x -= paddleSpeed / fps
-        }
-
-        if (paddleMoving == RIGHT && x < maxX) {
-            x += paddleSpeed / fps
-        }
-    }*/
 
     fun reset(screenX: Int, screenY: Int) {
         x = (screenX / 2).toFloat()

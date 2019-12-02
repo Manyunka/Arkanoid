@@ -71,7 +71,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         ball = Ball(screenX, screenY, resources)
 
         orientationData = OrientationData(context)
-        orientationData.register()
 
         val attributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
@@ -95,6 +94,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         ball.reset(screenX, screenY - paddle.getPaddle().height)
         pudding = ball.getBall().width.toFloat()
 
+        orientationData.register()
+
         lives = 3
         score = 0
 
@@ -117,7 +118,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
     private fun update() {
         ball.update(fps)
-        //paddle.update(fps)
+
+        val roll = orientationData.orientation[2] - orientationData.startOrientation[2]
+        val xSpeed = roll * screenX / 920f
+        paddle.update(xSpeed, timeThisFrame)
 
         val ballRect = RectF(
             ball.x, ball.y,
@@ -161,19 +165,14 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             soundPool.play(paddleID, 1f, 1f, 0, 0, 1f)
         }
         if (ball.y > screenY) {
-            //ball.reverseYVel()
-            //ball.clearObstacleY(screenY - 2.0f)
             soundPool.play(lostID, 1f, 1f, 0, 0, 1f)
+
+            paused = true
+            orientationData.pause()
 
             paddle.reset(screenX, screenY)
             ball.reset(screenX, screenY - paddle.getPaddle().height)
-
-            paused = true
             lives--
-            //if (lives < 1) {
-
-                //create()
-            //}
         }
 
         if (ball.y < pudding * 4) {
@@ -193,15 +192,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             ball.reverseXVel()
             ball.clearObstacleX(screenX - ballRect.width() - pudding)
             soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
-        }
-
-        if (orientationData.startOrientation != null) {
-            val roll = orientationData.orientation[2] - orientationData.startOrientation!![2]
-
-            val xSpeed = roll * screenX / 840f
-
-            if (abs(xSpeed) > 0)
-                paddle.x += if (abs(1000 / fps * xSpeed) > 5) (1000 / fps * xSpeed).toInt() else 0
         }
 
         if (paddle.x < pudding) paddle.x = pudding
@@ -300,6 +290,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
         when (motionEvent.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
+                orientationData.register()
                 paused = false
             }
         }
