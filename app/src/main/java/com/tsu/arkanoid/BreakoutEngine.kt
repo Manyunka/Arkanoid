@@ -23,6 +23,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     var playing = false
     private var paused = true
 
+    var level = -1
+
     private lateinit var canvas: Canvas
     private var paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -55,6 +57,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private var popID: Int
     private var boundID: Int
     private var paddleID: Int
+    private var enemyID: Int
     private var lostID: Int
 
     private var orientationData: OrientationData
@@ -86,6 +89,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         popID = soundPool.load(context, R.raw.pop, 0)
         boundID = soundPool.load(context, R.raw.bound, 0)
         paddleID = soundPool.load(context, R.raw.paddle, 0)
+        enemyID = soundPool.load(context, R.raw.enemy, 0)
         lostID = soundPool.load(context, R.raw.lost, 0)
 
         create()
@@ -144,13 +148,18 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     enemies[i]!!.x + enemies[i]!!.getEnemy().width,
                     enemies[i]!!.y + enemies[i]!!.getEnemy().height
                 )
-                if (RectF.intersects(enemyRect, ballRect) || RectF.intersects(enemyRect, paddleRect)) {
+                if (RectF.intersects(enemyRect, ballRect) || RectF.intersects(
+                        enemyRect,
+                        paddleRect
+                    )
+                ) {
                     enemies[i] = null
+                    soundPool.play(enemyID, 1f, 1f, 0, 0, 1f)
                     score += 10
-                }
-                else if (enemies[i]!!.y > screenY) {
+                } else if (enemies[i]!!.y > screenY) {
                     lives--
                     enemies[i] = null
+                    soundPool.play(lostID, 1f, 1f, 0, 0, 1f)
                     if (lives < 1) return
                 }
 
@@ -179,8 +188,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     }
                     soundPool.play(popID, 1f, 1f, 0, 0, 1f)
                     score++
-
-                    break
                 }
             }
         }
@@ -287,6 +294,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 canvas.drawText("WIN!", screenX * 0.5f, screenY * 0.5f, paint)
                 gameOver = true
                 paused = true
+
+                val storage = ScoresStorage(context)
+                storage.saveRank(level, lives)
+                storage.saveScores(level, score)
             }
 
             if (lives < 1) {

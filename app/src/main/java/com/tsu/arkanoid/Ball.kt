@@ -18,8 +18,8 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
     var y: Float
 
     init{
-        xVel = 200 * screenX / 1080f
-        yVel = -400 * screenY / 1920f
+        xVel = 250 * screenX / 1080f
+        yVel = -300 * screenY / 1920f
 
         width = ball.width
         height = ball.height

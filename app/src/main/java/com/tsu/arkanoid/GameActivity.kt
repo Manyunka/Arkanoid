@@ -7,6 +7,11 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.media.MediaPlayer
 import android.view.WindowManager
+import android.content.Intent
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 
 class GameActivity : Activity() {
@@ -66,6 +71,10 @@ class GameActivity : Activity() {
         mediaPlayer.stop()
         mediaPlayer.release()
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        startActivity(Intent(this, MainActivity::class.java))
     }
 }
 
