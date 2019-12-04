@@ -36,6 +36,7 @@ class Level3View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
     }
 
     init {
+        enemyType = 3
         backgroundID = R.drawable.level3_background
     }
 }

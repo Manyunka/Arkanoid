@@ -42,7 +42,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
     var bricks = arrayOfNulls<Brick>(100)
 
-    //var enemies = arrayOfNulls<Enemy>(100)
+    private var enemies = arrayOfNulls<Enemy>(100)
+    var enemyType = -1
 
     var numBricks = 0
 
@@ -134,8 +135,27 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             paddle.y + paddle.getPaddle().height
         )
 
-        //for (i in 0 until numBricks)
-            //if (enemies[i] != null) enemies[i]!!.update(fps)
+        for (i in 0 until numBricks) {
+            if (enemies[i] != null) {
+                enemies[i]!!.update(fps)
+
+                val enemyRect = RectF(
+                    enemies[i]!!.x, enemies[i]!!.y,
+                    enemies[i]!!.x + enemies[i]!!.getEnemy().width,
+                    enemies[i]!!.y + enemies[i]!!.getEnemy().height
+                )
+                if (RectF.intersects(enemyRect, ballRect) || RectF.intersects(enemyRect, paddleRect)) {
+                    enemies[i] = null
+                    score += 10
+                }
+                else if (enemies[i]!!.y > screenY) {
+                    lives--
+                    enemies[i] = null
+                    if (lives < 1) return
+                }
+
+            }
+        }
 
         for (i in 0 until numBricks) {
             if (bricks[i]!!.getVisibility()) {
@@ -147,15 +167,16 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
                 if (RectF.intersects(brickRect, ballRect)) {
                     if (bricks[i]!!.x + brickRect.width() / 2 - ball.x < 0.5
-                        || ball.x + ballRect.width() / 2 - bricks[i]!!.x < 0.5) {
+                        || ball.x + ballRect.width() / 2 - bricks[i]!!.x < 0.5
+                    ) {
                         ball.reverseXVel()
                     }
                     ball.reverseYVel()
                     bricks[i]!!.decreaseLevel()
 
-                    //if (Enemy.isAppeared() && enemies[i] == null) {
-                        //enemies[i] = Enemy(bricks[i]!!.x, bricks[i]!!.y, screenY, resources)
-                    //}
+                    if (Enemy.isAppeared(enemyType) && enemies[i] == null) {
+                        enemies[i] = Enemy(enemyType, screenX, screenY, pudding, resources)
+                    }
                     soundPool.play(popID, 1f, 1f, 0, 0, 1f)
                     score++
 
@@ -179,6 +200,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             paddle.reset(screenX, screenY)
             ball.reset(screenX, screenY - paddle.getPaddle().height)
             lives--
+            if (lives < 1) return
         }
 
         if (ball.y < pudding * 4) {
@@ -229,6 +251,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
 
             var remBricks = 0
+
             for (i in 0 until numBricks) {
                 if (bricks[i]!!.getVisibility()) {
                     canvas.drawBitmap(
@@ -240,14 +263,17 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     remBricks++
                 }
 
-                /*if (enemies[i] != null) {
+            }
+
+            for (i in 0 until numBricks) {
+                if (enemies[i] != null) {
                     canvas.drawBitmap(
                         enemies[i]!!.getEnemy(),
                         enemies[i]!!.x,
                         enemies[i]!!.y,
                         paint
                     )
-                }*/
+                }
             }
 
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
