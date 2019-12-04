@@ -21,7 +21,7 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
 
         maxX = screenX - width
 
-        x = (screenX / 2).toFloat()
+        x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
 
         paddle = Bitmap.createScaledBitmap(paddle, width, height, false)
@@ -36,7 +36,7 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
     }
 
     fun reset(screenX: Int, screenY: Int) {
-        x = (screenX / 2).toFloat()
+        x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
     }
 

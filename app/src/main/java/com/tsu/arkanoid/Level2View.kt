@@ -26,7 +26,7 @@ class Level2View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
         for (column in 0..8) {
             for (row in 0..6) {
                 bricks[numBricks] = Bubble(
-                    column * brickWidth.toFloat(),
+                    column * brickWidth.toFloat() + pudding,
                     row * brickHeight + 4 * pudding,
                     brickWidth, brickHeight, levels[numBricks], resources
                 )

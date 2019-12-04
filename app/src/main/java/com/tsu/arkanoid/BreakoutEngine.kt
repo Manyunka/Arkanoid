@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.Display
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import kotlin.math.abs
 import android.view.MotionEvent
 import android.media.SoundPool
 import android.media.AudioAttributes
@@ -42,6 +41,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private var ball: Ball
 
     var bricks = arrayOfNulls<Brick>(100)
+
+    //var enemies = arrayOfNulls<Enemy>(100)
 
     var numBricks = 0
 
@@ -133,6 +134,9 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             paddle.y + paddle.getPaddle().height
         )
 
+        //for (i in 0 until numBricks)
+            //if (enemies[i] != null) enemies[i]!!.update(fps)
+
         for (i in 0 until numBricks) {
             if (bricks[i]!!.getVisibility()) {
                 val brickRect = RectF(
@@ -142,18 +146,20 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 )
 
                 if (RectF.intersects(brickRect, ballRect)) {
-                    var f = false
-                    if (paddle.y + paddleRect.width() - ball.y < 3 || ball.y + ballRect.width() - paddle.y < 3) {
-                        ball.reverseYVel()
-                        bricks[i]!!.decreaseLevel()
-                        f = true
-                    }
-                    if (paddle.x + paddleRect.width() - ball.x < 3 || ball.x + ballRect.width() - paddle.x < 3) {
+                    if (bricks[i]!!.x + brickRect.width() / 2 - ball.x < 0.5
+                        || ball.x + ballRect.width() / 2 - bricks[i]!!.x < 0.5) {
                         ball.reverseXVel()
-                        if (!f) bricks[i]!!.decreaseLevel()
                     }
+                    ball.reverseYVel()
+                    bricks[i]!!.decreaseLevel()
+
+                    //if (Enemy.isAppeared() && enemies[i] == null) {
+                        //enemies[i] = Enemy(bricks[i]!!.x, bricks[i]!!.y, screenY, resources)
+                    //}
                     soundPool.play(popID, 1f, 1f, 0, 0, 1f)
                     score++
+
+                    break
                 }
             }
         }
@@ -227,12 +233,21 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 if (bricks[i]!!.getVisibility()) {
                     canvas.drawBitmap(
                         bricks[i]!!.getBrick(),
-                        bricks[i]!!.x + pudding,
+                        bricks[i]!!.x,
                         bricks[i]!!.y,
                         paint
                     )
                     remBricks++
                 }
+
+                /*if (enemies[i] != null) {
+                    canvas.drawBitmap(
+                        enemies[i]!!.getEnemy(),
+                        enemies[i]!!.x,
+                        enemies[i]!!.y,
+                        paint
+                    )
+                }*/
             }
 
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)

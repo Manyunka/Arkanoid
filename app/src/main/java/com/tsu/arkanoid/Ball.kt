@@ -24,7 +24,7 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
         width = ball.width
         height = ball.height
 
-        x = (screenX / 2).toFloat()
+        x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
 
         ball = Bitmap.createScaledBitmap(ball, width, height, false)
@@ -65,7 +65,7 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
     }
 
     fun reset(screenX: Int, screenY: Int) {
-        x = (screenX / 2).toFloat()
+        x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
     }
 }
