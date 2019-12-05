@@ -296,8 +296,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 paused = true
 
                 val storage = ScoresStorage(context)
-                storage.saveRank(level, lives)
-                storage.saveScores(level, score)
+                if (lives > storage.readRank(level))
+                    storage.saveRank(level, lives)
+                if (score > storage.readScores(level))
+                    storage.saveScores(level, score)
             }
 
             if (lives < 1) {

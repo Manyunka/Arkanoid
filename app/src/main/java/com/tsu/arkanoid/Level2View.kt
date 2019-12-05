@@ -10,17 +10,7 @@ class Level2View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
         val brickWidth = ((screenX - 2 * pudding) / 9).toInt()
         val brickHeight = screenY / 18
 
-        val levels = arrayOf(
-            1, 1, 1, 1, 1, 1, 1,
-            1, 1, 2, 2, 2, 1, 1,
-            1, 2, 3, 3, 3, 2, 1,
-            2, 3, 3, 4, 3, 3, 2,
-            3, 3, 4, 4, 4, 3, 3,
-            2, 3, 3, 4, 3, 3, 2,
-            1, 2, 3, 3, 3, 2, 1,
-            1, 1, 2, 2, 2, 1, 1,
-            1, 1, 1, 1, 1, 1, 1
-        )
+        val levels = resources.getIntArray(R.array.Level2)
 
         numBricks = 0
         for (column in 0..8) {

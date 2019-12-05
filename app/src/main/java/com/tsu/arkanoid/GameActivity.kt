@@ -2,24 +2,15 @@ package com.tsu.arkanoid
 
 import android.os.Bundle
 import android.app.Activity
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorManager
 import android.media.MediaPlayer
 import android.view.WindowManager
 import android.content.Intent
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
 
 
 class GameActivity : Activity() {
 
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var breakoutEngine: BreakoutEngine
-    private lateinit var sensorManager: SensorManager
-    private lateinit var sensor: Sensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,9 +38,6 @@ class GameActivity : Activity() {
 
         mediaPlayer.isLooping = true
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-
         setContentView(breakoutEngine)
 
     }
@@ -75,6 +63,7 @@ class GameActivity : Activity() {
 
     override fun onBackPressed() {
         startActivity(Intent(this, MainActivity::class.java))
+        super.onBackPressed()
     }
 }
 
