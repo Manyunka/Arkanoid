@@ -1,4 +1,4 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.model
 
 import android.content.Context
 import android.hardware.SensorManager

@@ -1,8 +1,9 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.model
 
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.tsu.arkanoid.R
 
 class Star(x: Float, y: Float, width: Int, height: Int, private var level: Int, res: Resources) :
     Brick(x, y) {

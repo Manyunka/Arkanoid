@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.media.SoundPool
 import android.media.AudioAttributes
 import androidx.core.content.ContextCompat
+import com.tsu.arkanoid.model.*
 
 @SuppressLint("ViewConstructor")
 abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(context),
@@ -22,6 +23,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     @Volatile
     var playing = false
     private var paused = true
+    private var gameOver = false
 
     var level = -1
 
@@ -29,7 +31,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private var paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var fps: Long = 0
-
     private var timeThisFrame: Long = 0
 
     var screenX: Int
@@ -39,19 +40,14 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     var backgroundID = -1
 
     private var paddle: Paddle
-
     private var ball: Ball
-
-    var bricks = arrayOfNulls<Brick>(100)
-
     private var enemies = arrayOfNulls<Enemy>(100)
-    var enemyType = -1
+    var bricks = arrayOfNulls<Brick>(100)
 
     var numBricks = 0
 
     private var lives = 3
     private var score = 0
-    private var gameOver = false
 
     private var soundPool: SoundPool
     private var popID: Int
@@ -69,10 +65,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         screenX = size.x
         screenY = size.y
 
-        //var bricks = arrayOfNulls<Star>(100)
-
         paddle = Paddle(screenX, screenY, resources)
-
         ball = Ball(screenX, screenY, resources)
 
         orientationData = OrientationData(context)
@@ -125,9 +118,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private fun update() {
         ball.update(fps)
 
-        val roll = orientationData.orientation[2] - orientationData.startOrientation[2]
-        val xSpeed = roll * screenX / 920f
-        paddle.update(xSpeed, timeThisFrame)
+        updatePaddle()
 
         val ballRect = RectF(
             ball.x, ball.y,
@@ -154,12 +145,12 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     )
                 ) {
                     enemies[i] = null
-                    soundPool.play(enemyID, 1f, 1f, 0, 0, 1f)
+                    playSound(enemyID)
                     score += 10
                 } else if (enemies[i]!!.y > screenY) {
                     lives--
                     enemies[i] = null
-                    soundPool.play(lostID, 1f, 1f, 0, 0, 1f)
+                    playSound(lostID)
                     if (lives < 1) return
                 }
 
@@ -183,10 +174,16 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     ball.reverseYVel()
                     bricks[i]!!.decreaseLevel()
 
-                    if (Enemy.isAppeared(enemyType) && enemies[i] == null) {
-                        enemies[i] = Enemy(enemyType, screenX, screenY, pudding, resources)
+                    if (Enemy.isAppeared(level) && enemies[i] == null) {
+                        enemies[i] = Enemy(
+                            level,
+                            screenX,
+                            screenY,
+                            pudding,
+                            resources
+                        )
                     }
-                    soundPool.play(popID, 1f, 1f, 0, 0, 1f)
+                    playSound(popID)
                     score++
                 }
             }
@@ -196,10 +193,11 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             ball.setRandomXVel()
             ball.reverseYVel()
             ball.clearObstacleY(paddle.y - 40)
-            soundPool.play(paddleID, 1f, 1f, 0, 0, 1f)
+            playSound(paddleID)
         }
+
         if (ball.y > screenY) {
-            soundPool.play(lostID, 1f, 1f, 0, 0, 1f)
+            playSound(lostID)
 
             paused = true
             orientationData.pause()
@@ -213,48 +211,47 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         if (ball.y < pudding * 4) {
             ball.reverseYVel()
             ball.clearObstacleY(pudding * 4)
-            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+            playSound(boundID)
         }
 
         if (ball.x < pudding) {
             ball.reverseXVel()
             ball.clearObstacleX(pudding)
-            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+            playSound(boundID)
         }
 
         if (ball.x > screenX - ballRect.width() - pudding) {
-
             ball.reverseXVel()
             ball.clearObstacleX(screenX - ballRect.width() - pudding)
-            soundPool.play(boundID, 1f, 1f, 0, 0, 1f)
+            playSound(boundID)
         }
-
-        if (paddle.x < pudding) paddle.x = pudding
-        if (paddle.x > screenX - paddleRect.width() - pudding)
-            paddle.x = screenX - paddleRect.width() - pudding
     }
 
     private fun draw() {
         if (ourHolder.surface.isValid) {
             canvas = ourHolder.lockCanvas()
 
+            paint.color = ContextCompat.getColor(context, R.color.panelColor)
+            canvas.drawRect(0f, 0f, pudding, screenY.toFloat(), paint)
+            canvas.drawRect(
+                screenX - pudding, 0f,
+                screenX.toFloat(), screenY.toFloat(), paint
+            )
+            canvas.drawRect(0f, 0f, screenX.toFloat(), pudding * 4, paint)
+
             var background = BitmapFactory
                 .decodeResource(resources, backgroundID)
             background = Bitmap
                 .createScaledBitmap(
                     background,
-                    screenX - pudding.toInt() * 2, screenY - pudding.toInt() * 2, false
+                    screenX - pudding.toInt() * 2,
+                    screenY - pudding.toInt() * 2,
+                    false
                 )
-
-            paint.color = ContextCompat.getColor(context, R.color.panelColor)
-            canvas.drawRect(0f, 0f, pudding, screenY.toFloat(), paint)
-            canvas.drawRect(screenX - pudding, 0f, screenX.toFloat(), screenY.toFloat(), paint)
-            canvas.drawRect(0f, 0f, screenX.toFloat(), pudding * 4, paint)
 
             canvas.drawBitmap(background, pudding, pudding * 4, paint)
 
             canvas.drawBitmap(paddle.getPaddle(), paddle.x, paddle.y, paint)
-
             canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
 
             var remBricks = 0
@@ -286,7 +283,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
             paint.textSize = 2f * pudding
             paint.textAlign = Paint.Align.LEFT
-            canvas.drawText("Lives: $lives      Score: $score", pudding * 2, pudding * 3, paint)
+            canvas.drawText(
+                "Lives: $lives      Score: $score",
+                pudding * 2, pudding * 3, paint
+            )
 
             if (remBricks == 0) {
                 paint.textSize = 7f * pudding
@@ -322,6 +322,20 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     }
 
     abstract fun createBricks()
+
+    private fun updatePaddle() {
+        val roll = orientationData.orientation[2] - orientationData.startOrientation[2]
+        val xSpeed = roll * screenX / 920f
+        paddle.update(xSpeed, timeThisFrame)
+
+        if (paddle.x < pudding) paddle.x = pudding
+        if (paddle.x > screenX - paddle.getPaddle().width - pudding)
+            paddle.x = screenX - paddle.getPaddle().width - pudding
+    }
+
+    private fun playSound(id: Int) {
+        soundPool.play(id, 1f, 1f, 0, 0, 1f)
+    }
 
     fun pause() {
         playing = false

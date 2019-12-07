@@ -1,8 +1,9 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.model
 
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.tsu.arkanoid.R
 import kotlin.math.abs
 
 

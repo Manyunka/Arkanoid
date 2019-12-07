@@ -1,10 +1,11 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.view
 
 import android.os.Bundle
 import android.app.Activity
 import android.media.MediaPlayer
 import android.view.WindowManager
 import android.content.Intent
+import com.tsu.arkanoid.*
 
 
 class GameActivity : Activity() {

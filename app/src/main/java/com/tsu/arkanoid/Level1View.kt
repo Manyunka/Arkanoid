@@ -3,6 +3,7 @@ package com.tsu.arkanoid
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
+import com.tsu.arkanoid.model.Star
 
 @SuppressLint("ViewConstructor")
 class Level1View(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
@@ -28,7 +29,6 @@ class Level1View(context: Context, gameDisplay: Display) : BreakoutEngine(contex
 
     init {
         level = 1
-        enemyType = 1
         backgroundID = R.drawable.level1_background
     }
 }

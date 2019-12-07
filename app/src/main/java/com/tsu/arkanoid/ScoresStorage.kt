@@ -64,13 +64,13 @@ class ScoresStorage(val context: Context) {
     }
 
     companion object {
-        val PREFERENCES_FILE_NAME = "STORAGE"
-        val SCORES_KEY_1 = "score_1"
-        val SCORES_KEY_2 = "score_2"
-        val SCORES_KEY_3 = "score_3"
-        val RANK_KEY_1 = "rank_1"
-        val RANK_KEY_2 = "rank_2"
-        val RANK_KEY_3 = "rank_3"
+        const val PREFERENCES_FILE_NAME = "STORAGE"
+        const val SCORES_KEY_1 = "score_1"
+        const val SCORES_KEY_2 = "score_2"
+        const val SCORES_KEY_3 = "score_3"
+        const val RANK_KEY_1 = "rank_1"
+        const val RANK_KEY_2 = "rank_2"
+        const val RANK_KEY_3 = "rank_3"
     }
 
 }

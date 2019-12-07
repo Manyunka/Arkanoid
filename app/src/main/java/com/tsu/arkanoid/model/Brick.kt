@@ -1,8 +1,6 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.model
 
-import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 
 
 abstract class Brick(x: Float, y: Float) {
@@ -12,7 +10,6 @@ abstract class Brick(x: Float, y: Float) {
 
     init {
         isVisible = true
-        //val padding = 5
 
         this.x = x
         this.y = y

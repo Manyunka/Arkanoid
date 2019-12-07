@@ -1,4 +1,4 @@
-package com.tsu.arkanoid
+package com.tsu.arkanoid.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.WindowManager
-
-
+import com.tsu.arkanoid.R
+import com.tsu.arkanoid.ScoresStorage
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,13 +27,6 @@ class MainActivity : AppCompatActivity() {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.main_sound)
         mediaPlayer.isLooping = true
-
-        /*val set = AnimatorInflater.loadAnimator(this, R.animator.bubble_trans_down) as AnimatorSet
-        val set2 = AnimatorInflater.loadAnimator(this, R.animator.bubble_trans_up) as AnimatorSet
-        set.setTarget(imageView)
-        set2.setTarget(imageView2)
-        set.start()
-        set2.start()*/
 
         val storage = ScoresStorage(applicationContext)
 

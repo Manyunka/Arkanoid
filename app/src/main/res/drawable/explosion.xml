@@ -3,4 +3,5 @@
     <item android:drawable="@drawable/explosion_1" android:duration="200" />
     <item android:drawable="@drawable/explosion_5" android:duration="200" />
     <item android:drawable="@drawable/explosion_9" android:duration="200" />
+    <item android:drawable="@drawable/explosion_13" android:duration="200" />
 </animation-list>
