@@ -40,11 +40,20 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     var backgroundID = -1
 
     private var paddle: Paddle
-    private var ball: Ball
-    private var enemies = arrayOfNulls<Enemy>(100)
-    var bricks = arrayOfNulls<Brick>(100)
 
+    private var bullets = arrayOfNulls<Bullet>(2)
+
+
+    private var balls = arrayOfNulls<Ball>(3)
+    private var numBalls = 0
+
+    private var enemies = arrayOfNulls<Enemy>(100)
+
+    private var bonuses = arrayOfNulls<Bonus>(100)
+
+    var bricks = arrayOfNulls<Brick>(100)
     var numBricks = 0
+
 
     private var lives = 3
     private var score = 0
@@ -66,7 +75,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         screenY = size.y
 
         paddle = Paddle(screenX, screenY, resources)
-        ball = Ball(screenX, screenY, resources)
 
         orientationData = OrientationData(context)
 
@@ -90,8 +98,14 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
     private fun create() {
         paddle.reset(screenX, screenY)
-        ball.reset(screenX, screenY - paddle.getPaddle().height)
-        pudding = ball.getBall().width.toFloat()
+
+        balls[0] = (Ball(
+            screenX, screenY,
+            paddle.x + paddle.getPaddle().width / 2, 45, resources
+        ))
+        balls[0]!!.reset(screenX, screenY - paddle.getPaddle().height)
+        pudding = balls[0]!!.getBall().width.toFloat()
+        numBalls = 1
 
         orientationData.register()
 
@@ -116,114 +130,262 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     }
 
     private fun update() {
-        ball.update(fps)
-
         updatePaddle()
 
-        val ballRect = RectF(
-            ball.x, ball.y,
-            ball.x + ball.getBall().width, ball.y + ball.getBall().height
-        )
-        val paddleRect = RectF(
-            paddle.x, paddle.y,
-            paddle.x + paddle.getPaddle().width,
-            paddle.y + paddle.getPaddle().height
-        )
+        for (j in bullets.indices) {
+            if (bullets[j] != null) {
+                bullets[j]!!.update(fps)
+
+                val bulletRect = RectF(
+                    bullets[j]!!.x, bullets[j]!!.y,
+                    bullets[j]!!.x + bullets[j]!!.getBullet().width,
+                    bullets[j]!!.y + bullets[j]!!.getBullet().height
+                )
+
+                if (bullets[j]!!.y < 4 * pudding) {
+                    bullets[j] = null
+                } else {
+                    for (i in 0 until numBricks) {
+                        if (bricks[i]!!.getVisibility()) {
+                            val brickRect = RectF(
+                                bricks[i]!!.x, bricks[i]!!.y,
+                                bricks[i]!!.x + bricks[i]!!.getBrick().width,
+                                bricks[i]!!.y + bricks[i]!!.getBrick().height
+                            )
+
+                            if (RectF.intersects(brickRect, bulletRect)) {
+                                bullets[j] = null
+                                bricks[i]!!.setInvisible()
+
+                                if (Enemy.isAppeared(level) && enemies[i] == null) {
+                                    enemies[i] = Enemy(
+                                        level,
+                                        screenX,
+                                        screenY,
+                                        pudding,
+                                        resources
+                                    )
+                                }
+
+                                if (Bonus.isAppeared() && bonuses[i] == null) {
+                                    bonuses[i] = Bonus(
+                                        screenX,
+                                        screenY,
+                                        pudding,
+                                        resources
+                                    )
+                                }
+                                playSound(popID)
+                                score++
+                            }
+                        }
+
+                        if (enemies[i] != null) {
+
+                            val enemyRect = RectF(
+                                enemies[i]!!.x, enemies[i]!!.y,
+                                enemies[i]!!.x + enemies[i]!!.getEnemy().width,
+                                enemies[i]!!.y + enemies[i]!!.getEnemy().height
+                            )
+                            if (RectF.intersects(enemyRect, bulletRect)
+                            ) {
+                                enemies[i] = null
+                                playSound(enemyID)
+                                score += 10
+                            } else if (enemies[i]!!.y > screenY) {
+                                lives--
+                                enemies[i] = null
+                                playSound(lostID)
+                                if (lives < 1) return
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
 
         for (i in 0 until numBricks) {
             if (enemies[i] != null) {
                 enemies[i]!!.update(fps)
-
-                val enemyRect = RectF(
-                    enemies[i]!!.x, enemies[i]!!.y,
-                    enemies[i]!!.x + enemies[i]!!.getEnemy().width,
-                    enemies[i]!!.y + enemies[i]!!.getEnemy().height
-                )
-                if (RectF.intersects(enemyRect, ballRect) || RectF.intersects(
-                        enemyRect,
-                        paddleRect
-                    )
-                ) {
-                    enemies[i] = null
-                    playSound(enemyID)
-                    score += 10
-                } else if (enemies[i]!!.y > screenY) {
-                    lives--
-                    enemies[i] = null
-                    playSound(lostID)
-                    if (lives < 1) return
-                }
-
+            }
+            if (bonuses[i] != null) {
+                bonuses[i]!!.update(fps)
             }
         }
 
-        for (i in 0 until numBricks) {
-            if (bricks[i]!!.getVisibility()) {
-                val brickRect = RectF(
-                    bricks[i]!!.x, bricks[i]!!.y,
-                    bricks[i]!!.x + bricks[i]!!.getBrick().width,
-                    bricks[i]!!.y + bricks[i]!!.getBrick().height
+
+
+        for (j in balls.indices) {
+            if (balls[j] != null) {
+                balls[j]!!.update(fps)
+                val ballRect = RectF(
+                    balls[j]!!.x, balls[j]!!.y,
+                    balls[j]!!.x + balls[j]!!.getBall().width,
+                    balls[j]!!.y + balls[j]!!.getBall().height
+                )
+                val paddleRect = RectF(
+                    paddle.x, paddle.y,
+                    paddle.x + paddle.getPaddle().width,
+                    paddle.y + paddle.getPaddle().height
                 )
 
-                if (RectF.intersects(brickRect, ballRect)) {
-                    if (bricks[i]!!.x + brickRect.width() / 2 - ball.x < 0.5
-                        || ball.x + ballRect.width() / 2 - bricks[i]!!.x < 0.5
-                    ) {
-                        ball.reverseXVel()
-                    }
-                    ball.reverseYVel()
-                    bricks[i]!!.decreaseLevel()
+                for (i in 0 until numBricks) {
+                    if (enemies[i] != null) {
 
-                    if (Enemy.isAppeared(level) && enemies[i] == null) {
-                        enemies[i] = Enemy(
-                            level,
-                            screenX,
-                            screenY,
-                            pudding,
-                            resources
+                        val enemyRect = RectF(
+                            enemies[i]!!.x, enemies[i]!!.y,
+                            enemies[i]!!.x + enemies[i]!!.getEnemy().width,
+                            enemies[i]!!.y + enemies[i]!!.getEnemy().height
                         )
+                        if (RectF.intersects(enemyRect, ballRect) || RectF.intersects(
+                                enemyRect,
+                                paddleRect
+                            )
+                        ) {
+                            enemies[i] = null
+                            playSound(enemyID)
+                            score += 10
+                        } else if (enemies[i]!!.y > screenY) {
+                            lives--
+                            enemies[i] = null
+                            playSound(lostID)
+                            if (lives < 1) return
+                        }
+
                     }
-                    playSound(popID)
-                    score++
+
+                    if (bonuses[i] != null) {
+                        val bonusRect = RectF(
+                            bonuses[i]!!.x, bonuses[i]!!.y,
+                            bonuses[i]!!.x + bonuses[i]!!.getBonus().width,
+                            bonuses[i]!!.y + bonuses[i]!!.getBonus().height
+                        )
+                        if (RectF.intersects(bonusRect, paddleRect)
+                        ) {
+                            when (bonuses[i]!!.getTypeBonus()) {
+                                EXPAND -> {
+                                    paddle.changeWidth()
+                                }
+                                DIVIDE -> {
+                                    for (k in balls.indices)
+                                        if (balls[k] == null) {
+                                            balls[k] = Ball(
+                                                screenX,
+                                                screenY,
+                                                paddle.x + paddleRect.width() / 2,
+                                                150,
+                                                resources
+                                            )
+                                            numBalls++
+                                        }
+                                }
+                                LASER -> {
+                                    bullets[0] = Bullet(screenY, paddle.x + 2, resources)
+                                    bullets[1] = Bullet(
+                                        screenY,
+                                        paddle.x + paddleRect.width() - bullets[0]!!.getBullet().width - 3,
+                                        resources
+                                    )
+                                }
+                                PLAYER -> {
+                                    if (lives < 3)
+                                        lives++
+                                }
+
+                            }
+                            bonuses[i] = null
+                            //playSound(bonusesID)
+                        } else if (bonuses[i]!!.y > screenY) {
+                            bonuses[i] = null
+                        }
+
+                    }
+                }
+
+                for (i in 0 until numBricks) {
+                    if (bricks[i]!!.getVisibility()) {
+                        val brickRect = RectF(
+                            bricks[i]!!.x, bricks[i]!!.y,
+                            bricks[i]!!.x + bricks[i]!!.getBrick().width,
+                            bricks[i]!!.y + bricks[i]!!.getBrick().height
+                        )
+
+                        if (RectF.intersects(brickRect, ballRect)) {
+                            if (bricks[i]!!.x + brickRect.width() / 2 - balls[j]!!.x < 0.5
+                                || balls[j]!!.x + ballRect.width() / 2 - bricks[i]!!.x < 0.5
+                            ) {
+                                balls[j]!!.reverseXVel()
+                            }
+                            balls[j]!!.reverseYVel()
+                            bricks[i]!!.decreaseLevel()
+
+                            if (Enemy.isAppeared(level) && enemies[i] == null) {
+                                enemies[i] = Enemy(
+                                    level,
+                                    screenX,
+                                    screenY,
+                                    pudding,
+                                    resources
+                                )
+                            }
+
+                            if (Bonus.isAppeared() && bonuses[i] == null) {
+                                bonuses[i] = Bonus(
+                                    screenX,
+                                    screenY,
+                                    pudding,
+                                    resources
+                                )
+                            }
+                            playSound(popID)
+                            score++
+                        }
+                    }
+                }
+
+                if (RectF.intersects(ballRect, paddleRect)) {
+                    balls[j]!!.setRandomXVel()
+                    balls[j]!!.reverseYVel()
+                    balls[j]!!.clearObstacleY(paddle.y - 40)
+                    playSound(paddleID)
+                }
+
+                if (balls[j]!!.y < pudding * 4) {
+                    balls[j]!!.reverseYVel()
+                    balls[j]!!.clearObstacleY(pudding * 4)
+                    playSound(boundID)
+                }
+
+                if (balls[j]!!.x < pudding) {
+                    balls[j]!!.reverseXVel()
+                    balls[j]!!.clearObstacleX(pudding)
+                    playSound(boundID)
+                }
+
+                if (balls[j]!!.x > screenX - ballRect.width() - pudding) {
+                    balls[j]!!.reverseXVel()
+                    balls[j]!!.clearObstacleX(screenX - ballRect.width() - pudding)
+                    playSound(boundID)
+                }
+
+                if (balls[j]!!.y > screenY) {
+                    if (numBalls > 1) {
+                        balls[j] = null
+                        numBalls--
+                    } else {
+                        playSound(lostID)
+
+                        paused = true
+                        orientationData.pause()
+
+                        paddle.reset(screenX, screenY)
+                        balls[j]!!.reset(screenX, screenY - paddle.getPaddle().height)
+                        lives--
+                        if (lives < 1) return
+                    }
                 }
             }
-        }
-
-        if (RectF.intersects(ballRect, paddleRect)) {
-            ball.setRandomXVel()
-            ball.reverseYVel()
-            ball.clearObstacleY(paddle.y - 40)
-            playSound(paddleID)
-        }
-
-        if (ball.y > screenY) {
-            playSound(lostID)
-
-            paused = true
-            orientationData.pause()
-
-            paddle.reset(screenX, screenY)
-            ball.reset(screenX, screenY - paddle.getPaddle().height)
-            lives--
-            if (lives < 1) return
-        }
-
-        if (ball.y < pudding * 4) {
-            ball.reverseYVel()
-            ball.clearObstacleY(pudding * 4)
-            playSound(boundID)
-        }
-
-        if (ball.x < pudding) {
-            ball.reverseXVel()
-            ball.clearObstacleX(pudding)
-            playSound(boundID)
-        }
-
-        if (ball.x > screenX - ballRect.width() - pudding) {
-            ball.reverseXVel()
-            ball.clearObstacleX(screenX - ballRect.width() - pudding)
-            playSound(boundID)
         }
     }
 
@@ -252,7 +414,20 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             canvas.drawBitmap(background, pudding, pudding * 4, paint)
 
             canvas.drawBitmap(paddle.getPaddle(), paddle.x, paddle.y, paint)
-            canvas.drawBitmap(ball.getBall(), ball.x, ball.y, paint)
+
+            for (i in balls.indices)
+                if (balls[i] != null)
+                    canvas.drawBitmap(balls[i]!!.getBall(), balls[i]!!.x, balls[i]!!.y, paint)
+
+            for (i in bullets.indices) {
+                if (bullets[i] != null)
+                    canvas.drawBitmap(
+                        bullets[i]!!.getBullet(),
+                        bullets[i]!!.x,
+                        bullets[i]!!.y,
+                        paint
+                    )
+            }
 
             var remBricks = 0
 
@@ -275,6 +450,17 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                         enemies[i]!!.getEnemy(),
                         enemies[i]!!.x,
                         enemies[i]!!.y,
+                        paint
+                    )
+                }
+            }
+
+            for (i in 0 until numBricks) {
+                if (bonuses[i] != null) {
+                    canvas.drawBitmap(
+                        bonuses[i]!!.getBonus(),
+                        bonuses[i]!!.x,
+                        bonuses[i]!!.y,
                         paint
                     )
                 }
@@ -363,6 +549,13 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             }
         }
         return true
+    }
+
+    companion object {
+        const val EXPAND = 0
+        const val DIVIDE = 1
+        const val LASER = 2
+        const val PLAYER = 3
     }
 
 }

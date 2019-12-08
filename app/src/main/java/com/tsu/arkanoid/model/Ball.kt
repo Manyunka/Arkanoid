@@ -4,12 +4,14 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.tsu.arkanoid.R
+import java.lang.Math.PI
+import java.lang.Math.cos
 
 import java.util.*
 
 
 
-class Ball(screenX: Int, screenY: Int, res: Resources) {
+class Ball(screenX: Int, screenY: Int, x: Float, alpha: Int, res: Resources) {
     private var ball = BitmapFactory.decodeResource(res, R.drawable.ball)
     private var xVel: Float
     private var yVel: Float
@@ -19,13 +21,13 @@ class Ball(screenX: Int, screenY: Int, res: Resources) {
     var y: Float
 
     init{
-        xVel = 250 * screenX / 1080f
-        yVel = -300 * screenY / 1920f
+        xVel = (kotlin.math.cos(alpha * (PI / 180)) * 300 * screenX / 1080f).toFloat()
+        yVel = -(kotlin.math.sin(alpha * (PI / 180)) * 300 * screenY / 1920f).toFloat()
 
         width = ball.width
         height = ball.height
 
-        x = (screenX / 2 - width / 2).toFloat()
+        this.x = x - width / 2
         y = (screenY - 40 - height).toFloat()
 
         ball = Bitmap.createScaledBitmap(ball, width, height, false)
