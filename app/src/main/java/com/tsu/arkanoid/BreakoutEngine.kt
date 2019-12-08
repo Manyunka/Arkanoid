@@ -55,6 +55,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     var numBricks = 0
 
 
+    private var hearts = Array(3)
+    { Heart(pudding, pudding / 2, 85, 85, 0, resources) }
     private var lives = 3
     private var score = 0
 
@@ -274,7 +276,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                                                 screenX,
                                                 screenY,
                                                 paddle.x + paddleRect.width() / 2,
-                                                150,
+                                                Ball.generateAngle(),
                                                 resources
                                             )
                                             numBalls++
@@ -466,13 +468,27 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 }
             }
 
+
+
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
             paint.textSize = 2f * pudding
-            paint.textAlign = Paint.Align.LEFT
+            paint.textAlign = Paint.Align.RIGHT
             canvas.drawText(
-                "Lives: $lives      Score: $score",
-                pudding * 2, pudding * 3, paint
+                "Score: $score",
+                screenX - pudding * 2, pudding * 3, paint
             )
+
+            for (i in 0 until 3) {
+                if (i < lives)
+                    hearts[i].changeType(1)
+                else hearts[i].changeType(0)
+                canvas.drawBitmap(
+                    hearts[i].getHeart(),
+                    hearts[i].x + (pudding + hearts[i].getHeart().width) * i,
+                    hearts[i].y,
+                    paint
+                )
+            }
 
             if (remBricks == 0) {
                 paint.textSize = 7f * pudding

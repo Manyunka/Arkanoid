@@ -71,4 +71,10 @@ class Ball(screenX: Int, screenY: Int, x: Float, alpha: Int, res: Resources) {
         x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
     }
+
+    companion object {
+        fun generateAngle(): Int {
+            return Random().nextInt(121) + 30
+        }
+    }
 }

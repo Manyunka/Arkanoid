@@ -11,6 +11,8 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
     private var paddle: Bitmap
     private var paddleNormal = BitmapFactory.decodeResource(res, R.drawable.paddle)
     private var paddleBonus = BitmapFactory.decodeResource(res, R.drawable.paddle_bonus)
+    private var paddleBonusDis
+            = BitmapFactory.decodeResource(res, R.drawable.paddle_bonus_dis)
     private var width: Int
     private var height: Int
     private var bonusTime = 0
@@ -46,6 +48,15 @@ class Paddle(screenX: Int, screenY: Int, res: Resources) {
 
         if (bonusTime > 0) {
             bonusTime--
+
+            paddle = if (bonusTime in 120..140 || bonusTime in 80..100
+                || bonusTime in 40..60
+                || bonusTime in 20..30
+                || bonusTime in 0..10) {
+                Bitmap.createScaledBitmap(paddleBonusDis, width, height, false)
+            } else {
+                Bitmap.createScaledBitmap(paddleBonus, width, height, false)
+            }
 
             if (bonusTime < 1) {
                 width = paddleNormal.width
