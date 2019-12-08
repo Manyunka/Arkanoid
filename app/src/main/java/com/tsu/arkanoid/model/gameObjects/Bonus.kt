@@ -1,4 +1,4 @@
-package com.tsu.arkanoid.model
+package com.tsu.arkanoid.model.gameObjects
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -52,7 +52,7 @@ class Bonus(screenX: Int, screenY: Int, pudding: Float, res: Resources) {
 
     companion object {
         fun isAppeared(): Boolean {
-            val answer = Random().nextInt(1)
+            val answer = Random().nextInt(16)
 
             return answer == 0
         }

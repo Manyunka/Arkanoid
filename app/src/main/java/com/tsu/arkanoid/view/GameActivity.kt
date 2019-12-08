@@ -24,23 +24,22 @@ class GameActivity : Activity() {
         when (intent.extras?.getInt("LEVEL_ID")) {
             1 -> {
                 mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
-                breakoutEngine = Level1View(this, display)
+                breakoutEngine = Level1(this, display)
             }
             2 -> {
                 mediaPlayer = MediaPlayer.create(this, R.raw.level2_theme)
-                breakoutEngine = Level2View(this, display)
+                breakoutEngine = Level2(this, display)
             }
             3 -> {
                 mediaPlayer = MediaPlayer.create(this, R.raw.level3_theme)
-                breakoutEngine = Level3View(this, display)
+                breakoutEngine = Level3(this, display)
             }
-            else -> mediaPlayer = MediaPlayer.create(this, R.raw.level2_theme)
+            else -> mediaPlayer = MediaPlayer.create(this, R.raw.level1_theme)
         }
 
         mediaPlayer.isLooping = true
 
         setContentView(breakoutEngine)
-
     }
 
     override fun onResume() {

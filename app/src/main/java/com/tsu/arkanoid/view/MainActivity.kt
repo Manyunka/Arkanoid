@@ -8,7 +8,7 @@ import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.WindowManager
 import com.tsu.arkanoid.R
-import com.tsu.arkanoid.ScoresStorage
+import com.tsu.arkanoid.model.ScoresStorage
 
 
 class MainActivity : AppCompatActivity() {

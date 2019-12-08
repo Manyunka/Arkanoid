@@ -12,6 +12,8 @@ import android.media.SoundPool
 import android.media.AudioAttributes
 import androidx.core.content.ContextCompat
 import com.tsu.arkanoid.model.*
+import com.tsu.arkanoid.model.gameObjects.*
+import com.tsu.arkanoid.model.gameObjects.bricks.Brick
 
 @SuppressLint("ViewConstructor")
 abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceView(context),
@@ -64,6 +66,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
     private var popID: Int
     private var boundID: Int
     private var paddleID: Int
+    private var bonusID: Int
+    private var laserID: Int
     private var enemyID: Int
     private var lostID: Int
 
@@ -92,6 +96,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         popID = soundPool.load(context, R.raw.pop, 0)
         boundID = soundPool.load(context, R.raw.bound, 0)
         paddleID = soundPool.load(context, R.raw.paddle, 0)
+        bonusID = soundPool.load(context, R.raw.bonus, 0)
+        laserID = soundPool.load(context, R.raw.laser, 0)
         enemyID = soundPool.load(context, R.raw.enemy, 0)
         lostID = soundPool.load(context, R.raw.lost, 0)
 
@@ -103,7 +109,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
 
         balls[0] = (Ball(
             screenX, screenY,
-            paddle.x + paddle.getPaddle().width / 2, 45, resources
+            paddle.x + paddle.getPaddle().width / 2, 30, resources
         ))
         balls[0]!!.reset(screenX, screenY - paddle.getPaddle().height)
         pudding = balls[0]!!.getBall().width.toFloat()
@@ -177,8 +183,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                                         resources
                                     )
                                 }
-                                playSound(popID)
-                                score++
+                                playSound(popID, 1)
+                                score += bricks[i]!!.level
                             }
                         }
 
@@ -191,14 +197,10 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                             )
                             if (RectF.intersects(enemyRect, bulletRect)
                             ) {
+                                bullets[j] = null
                                 enemies[i] = null
-                                playSound(enemyID)
+                                playSound(enemyID, 1)
                                 score += 10
-                            } else if (enemies[i]!!.y > screenY) {
-                                lives--
-                                enemies[i] = null
-                                playSound(lostID)
-                                if (lives < 1) return
                             }
 
                         }
@@ -210,9 +212,18 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
         for (i in 0 until numBricks) {
             if (enemies[i] != null) {
                 enemies[i]!!.update(fps)
+                if (enemies[i]!!.y > screenY) {
+                    lives--
+                    enemies[i] = null
+                    playSound(lostID, 1)
+                    if (lives < 1) return
+                }
             }
             if (bonuses[i] != null) {
                 bonuses[i]!!.update(fps)
+                if (bonuses[i]!!.y > screenY) {
+                    bonuses[i] = null
+                }
             }
         }
 
@@ -246,15 +257,9 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                             )
                         ) {
                             enemies[i] = null
-                            playSound(enemyID)
+                            playSound(enemyID, 1)
                             score += 10
-                        } else if (enemies[i]!!.y > screenY) {
-                            lives--
-                            enemies[i] = null
-                            playSound(lostID)
-                            if (lives < 1) return
                         }
-
                     }
 
                     if (bonuses[i] != null) {
@@ -263,8 +268,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                             bonuses[i]!!.x + bonuses[i]!!.getBonus().width,
                             bonuses[i]!!.y + bonuses[i]!!.getBonus().height
                         )
-                        if (RectF.intersects(bonusRect, paddleRect)
-                        ) {
+                        if (RectF.intersects(bonusRect, paddleRect)) {
+                            playSound(bonusID, 1)
                             when (bonuses[i]!!.getTypeBonus()) {
                                 EXPAND -> {
                                     paddle.changeWidth()
@@ -283,22 +288,23 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                                         }
                                 }
                                 LASER -> {
-                                    bullets[0] = Bullet(screenY, paddle.x + 2, resources)
+                                    bullets[0] = Bullet(
+                                        screenY,
+                                        paddle.x + 2,
+                                        resources
+                                    )
                                     bullets[1] = Bullet(
                                         screenY,
                                         paddle.x + paddleRect.width() - bullets[0]!!.getBullet().width - 3,
                                         resources
                                     )
+                                    playSound(laserID, 2)
                                 }
                                 PLAYER -> {
                                     if (lives < 3)
                                         lives++
                                 }
-
                             }
-                            bonuses[i] = null
-                            //playSound(bonusesID)
-                        } else if (bonuses[i]!!.y > screenY) {
                             bonuses[i] = null
                         }
 
@@ -340,7 +346,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                                     resources
                                 )
                             }
-                            playSound(popID)
+                            playSound(popID, 1)
                             score++
                         }
                     }
@@ -350,25 +356,25 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                     balls[j]!!.setRandomXVel()
                     balls[j]!!.reverseYVel()
                     balls[j]!!.clearObstacleY(paddle.y - 40)
-                    playSound(paddleID)
+                    playSound(paddleID, 0)
                 }
 
                 if (balls[j]!!.y < pudding * 4) {
                     balls[j]!!.reverseYVel()
                     balls[j]!!.clearObstacleY(pudding * 4)
-                    playSound(boundID)
+                    playSound(boundID, 0)
                 }
 
                 if (balls[j]!!.x < pudding) {
                     balls[j]!!.reverseXVel()
                     balls[j]!!.clearObstacleX(pudding)
-                    playSound(boundID)
+                    playSound(boundID, 0)
                 }
 
                 if (balls[j]!!.x > screenX - ballRect.width() - pudding) {
                     balls[j]!!.reverseXVel()
                     balls[j]!!.clearObstacleX(screenX - ballRect.width() - pudding)
-                    playSound(boundID)
+                    playSound(boundID, 0)
                 }
 
                 if (balls[j]!!.y > screenY) {
@@ -376,7 +382,7 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                         balls[j] = null
                         numBalls--
                     } else {
-                        playSound(lostID)
+                        playSound(lostID, 1)
 
                         paused = true
                         orientationData.pause()
@@ -469,7 +475,6 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             }
 
 
-
             paint.color = ContextCompat.getColor(context, R.color.colorAccent)
             paint.textSize = 2f * pudding
             paint.textAlign = Paint.Align.RIGHT
@@ -490,14 +495,17 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
                 )
             }
 
+            val storage = ScoresStorage(context)
             if (remBricks == 0) {
-                paint.textSize = 7f * pudding
                 paint.textAlign = Paint.Align.CENTER
-                canvas.drawText("WIN!", screenX * 0.5f, screenY * 0.5f, paint)
+                paint.textSize = 5f * pudding
+                canvas.drawText("Score: $score", screenX * 0.5f, screenY * 0.5f, paint)
+
+                paint.textSize = 7f * pudding
+                canvas.drawText("WIN!", screenX * 0.5f, screenY * 0.4f, paint)
                 gameOver = true
                 paused = true
 
-                val storage = ScoresStorage(context)
                 if (lives > storage.readRank(level))
                     storage.saveRank(level, lives)
                 if (score > storage.readScores(level))
@@ -505,12 +513,17 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             }
 
             if (lives < 1) {
-                paint.color = Color.RED
-                paint.textSize = 5f * pudding
                 paint.textAlign = Paint.Align.CENTER
-                canvas.drawText("GAME OVER", screenX * 0.5f, screenY * 0.5f, paint)
+                paint.textSize = 5f * pudding
+                canvas.drawText("Score: $score", screenX * 0.5f, screenY * 0.5f, paint)
+
+                paint.color = Color.RED
+                canvas.drawText("GAME OVER", screenX * 0.5f, screenY * 0.4f, paint)
                 gameOver = true
                 paused = true
+
+                if (score > storage.readScores(level))
+                    storage.saveScores(level, score)
             }
 
             if (paused && !gameOver) {
@@ -535,8 +548,8 @@ abstract class BreakoutEngine(context: Context, gameDisplay: Display) : SurfaceV
             paddle.x = screenX - paddle.getPaddle().width - pudding
     }
 
-    private fun playSound(id: Int) {
-        soundPool.play(id, 1f, 1f, 0, 0, 1f)
+    private fun playSound(id: Int, priority: Int) {
+        soundPool.play(id, 1f, 1f, priority, 0, 1f)
     }
 
     fun pause() {

@@ -1,4 +1,4 @@
-package com.tsu.arkanoid.model
+package com.tsu.arkanoid.model.gameObjects
 
 import android.content.res.Resources
 import android.graphics.Bitmap

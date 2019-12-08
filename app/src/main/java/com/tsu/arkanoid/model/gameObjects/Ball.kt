@@ -1,4 +1,4 @@
-package com.tsu.arkanoid.model
+package com.tsu.arkanoid.model.gameObjects
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -8,10 +8,10 @@ import java.lang.Math.PI
 import java.lang.Math.cos
 
 import java.util.*
+import kotlin.math.atan
 
 
-
-class Ball(screenX: Int, screenY: Int, x: Float, alpha: Int, res: Resources) {
+class Ball(screenX: Int, screenY: Int, x: Float, angle: Int, res: Resources) {
     private var ball = BitmapFactory.decodeResource(res, R.drawable.ball)
     private var xVel: Float
     private var yVel: Float
@@ -21,8 +21,8 @@ class Ball(screenX: Int, screenY: Int, x: Float, alpha: Int, res: Resources) {
     var y: Float
 
     init{
-        xVel = (kotlin.math.cos(alpha * (PI / 180)) * 300 * screenX / 1080f).toFloat()
-        yVel = -(kotlin.math.sin(alpha * (PI / 180)) * 300 * screenY / 1920f).toFloat()
+        xVel = (kotlin.math.cos(angle * (PI / 180)) * 300 * screenX / 1080f).toFloat()
+        yVel = -(kotlin.math.sin(angle * (PI / 180)) * 300 * screenY / 1920f).toFloat()
 
         width = ball.width
         height = ball.height
@@ -68,6 +68,8 @@ class Ball(screenX: Int, screenY: Int, x: Float, alpha: Int, res: Resources) {
     }
 
     fun reset(screenX: Int, screenY: Int) {
+        xVel = (kotlin.math.cos(45 * (PI / 180)) * 300 * screenX / 1080f).toFloat()
+        yVel = -(kotlin.math.sin(45 * (PI / 180)) * 300 * screenY / 1920f).toFloat()
         x = (screenX / 2 - width / 2).toFloat()
         y = (screenY - 40 - height).toFloat()
     }

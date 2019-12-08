@@ -3,10 +3,10 @@ package com.tsu.arkanoid
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
-import com.tsu.arkanoid.model.Star
+import com.tsu.arkanoid.model.gameObjects.bricks.Star
 
 @SuppressLint("ViewConstructor")
-class Level1View(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
+class Level1(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
 
     override fun createBricks() {
         val brickWidth = ((screenX - 2 * pudding) / 9).toInt()

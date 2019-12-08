@@ -3,10 +3,10 @@ package com.tsu.arkanoid
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
-import com.tsu.arkanoid.model.Bubble
+import com.tsu.arkanoid.model.gameObjects.bricks.Bubble
 
 @SuppressLint("ViewConstructor")
-class Level2View(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
+class Level2(context: Context, gameDisplay: Display) : BreakoutEngine(context, gameDisplay) {
     override fun createBricks() {
         val brickWidth = ((screenX - 2 * pudding) / 9).toInt()
         val brickHeight = screenY / 18

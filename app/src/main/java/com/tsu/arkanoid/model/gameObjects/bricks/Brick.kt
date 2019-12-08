@@ -1,9 +1,9 @@
-package com.tsu.arkanoid.model
+package com.tsu.arkanoid.model.gameObjects.bricks
 
 import android.graphics.Bitmap
 
 
-abstract class Brick(x: Float, y: Float) {
+abstract class Brick(x: Float, y: Float, var level: Int) {
     var isVisible: Boolean = false
     var x: Float
     var y: Float
